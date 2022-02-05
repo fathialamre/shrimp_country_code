@@ -171,7 +171,7 @@ class _ShrimpCountryCodeState extends State<ShrimpCountryCode> {
                                                                   4.0),
                                                           child: Image(
                                                             image: AssetImage(
-                                                                'flags/${country.shortName.toString().toLowerCase()}.png'),
+                                                                'assets/flags/${country.shortName.toString().toLowerCase()}.png'),
                                                             width: 27,
                                                           ),
                                                         ),
