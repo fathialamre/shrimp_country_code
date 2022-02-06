@@ -1,40 +1,35 @@
-<!-- 
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
-
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages). 
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages). 
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
-
-## Features
-
-TODO: List what your package can do. Maybe include images, gifs, or videos.
-
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
-
+## Shrimp Country Code
+A flutter package for showing a country code selector.
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder. 
+To use this plugin, add shrimp_country_code as a dependency in your pubspec.yaml.
+
+Just put the component in your application setting the onChanged callback.
 
 ```dart
-const like = 'sample';
+ShrimpCountryCode(
+    modalTitle: 'Countries',
+    initialCountry: 'LY',
+    showFlags: false,
+    searchFieldHint: 'Search by country name',
+    onChanged: (CountryInfo country) {
+    if (kDebugMode) {
+        print(country.toJson());
+        }
+    },
+)
 ```
+# Customization
 
-## Additional information
+| Name | Type | Description |
+| ------ | ------ | -------|
+| onChange | ValueChanged | callback invoked when the selection changes |
+| modalTitle | String | Modal title |
+| inputDecoration | InputDecoration | Search text box decoration
 
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
-# shrimp_country_code
+# Support the Library
+You can support the library by staring it on Github && liking it on pub or report any bugs you encounter.
+also, if you have a suggestion or think something can be implemented in a better way, open an issue and let's talk about it.
+
+## License
+MIT

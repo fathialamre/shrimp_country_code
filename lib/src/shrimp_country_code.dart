@@ -1,24 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:shrimp_country_code/src/country.dart';
 
 import 'circle_radio_otpion.dart';
+import 'country_data.dart';
 import 'country_info.dart';
 
 class ShrimpCountryCode extends StatefulWidget {
-  const ShrimpCountryCode(
-      {Key? key,
-      this.padding = 10,
-      this.radius = 8,
-      this.onChanged,
-      this.inputDecoration,
-      required this.modalTitle})
-      : super(key: key);
-
   final double padding;
   final double radius;
+  final double modalToRadius;
+  final bool showFlags;
   final String modalTitle;
+  final String? searchFieldHint;
   final InputDecoration? inputDecoration;
+  final String? initialCountry;
   final ValueChanged<CountryInfo>? onChanged;
+
+  /// Background color of ModalBottomSheet
+  final Color? backgroundColor;
+
+  const ShrimpCountryCode({
+    Key? key,
+    this.padding = 10,
+    this.radius = 8,
+    this.modalToRadius = 30,
+    this.onChanged,
+    this.inputDecoration,
+    required this.modalTitle,
+    this.initialCountry,
+    this.backgroundColor,
+    this.searchFieldHint,
+    this.showFlags = true,
+  }) : super(key: key);
 
   @override
   State<ShrimpCountryCode> createState() => _ShrimpCountryCodeState();
@@ -31,35 +43,48 @@ class _ShrimpCountryCodeState extends State<ShrimpCountryCode> {
 
   @override
   void initState() {
-    List<CountryInfo> elements =
-        countryInfo.map((json) => CountryInfo.fromJson(json)).toList();
-
-    countryList = elements;
-    selectedCountry = CountryInfo(
-        dialCode: '218',
-        shortName: 'LY',
-        name: 'Libya',
-        displayName: 'display_name');
+    _onInit();
     super.initState();
   }
 
-  void _updateSelection(CountryInfo e) {
-    if (widget.onChanged != null) {
-      widget.onChanged!(e);
-      setState(() {
-        selectedCountry = e;
-      });
+  _onInit() {
+    countryList =
+        countries_data.map((json) => CountryInfo.fromJson(json)).toList();
+    _setInitialCountry();
+  }
+
+  _setInitialCountry() {
+    if (widget.initialCountry != null) {
+      selectedCountry = countryList
+          .firstWhere((element) => element.shortName == widget.initialCountry);
+    } else {
+      selectedCountry = CountryInfo(
+        dialCode: '218',
+        shortName: 'LY',
+        name: 'Libya',
+        displayName: 'Libya (LY) [+218]',
+      );
     }
   }
 
-  void _filterElements(String s) {
-    s = s.toUpperCase();
+  _updateSelection(CountryInfo e) {
+    if (widget.onChanged != null) {
+      widget.onChanged!(e);
+    }
+    setState(() {
+      selectedCountry = e;
+    });
+    Navigator.pop(context);
+  }
+
+  _filterCountries(String keyWord) {
+    keyWord = keyWord.toUpperCase();
     setState(() {
       filteredElements = countryList
           .where((e) =>
-              e.dialCode!.contains(s) ||
-              e.shortName!.contains(s) ||
-              e.name!.toUpperCase().contains(s))
+              e.dialCode!.contains(keyWord) ||
+              e.shortName!.contains(keyWord) ||
+              e.name!.toUpperCase().contains(keyWord))
           .toList();
     });
   }
@@ -69,152 +94,30 @@ class _ShrimpCountryCodeState extends State<ShrimpCountryCode> {
     return InkWell(
       onTap: () {
         showModalBottomSheet<void>(
-          backgroundColor: Colors.white,
+          backgroundColor: widget.backgroundColor ?? Colors.white,
           context: context,
           isScrollControlled: true,
-          shape: const RoundedRectangleBorder(
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(
-              top: Radius.circular(30),
+              top: Radius.circular(widget.modalToRadius),
             ),
           ),
           clipBehavior: Clip.antiAliasWithSaveLayer,
           builder: (BuildContext context) {
             return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-                return SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.9,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 10.0),
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.9,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Expanded(
-                                child: SizedBox(),
-                                flex: 2,
-                              ),
-                              Expanded(
-                                child: Center(
-                                    child: Text(
-                                  widget.modalTitle,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold),
-                                )),
-                                flex: 2,
-                              ),
-                              Expanded(
-                                child: Align(
-                                  alignment: Alignment.centerRight,
-                                  child: IconButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    icon: const Icon(
-                                      Icons.close,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                                flex: 2,
-                              ),
-                            ],
-                          ),
-                        ),
-                        TextFormField(
-                          onChanged: (String keyWord) {
-                            _filterElements(keyWord);
-                          },
-                          decoration: widget.inputDecoration,
-                        ),
-                        Expanded(
-                          child: ListView.builder(
-                              padding: const EdgeInsets.all(8),
-                              itemCount: filteredElements.isNotEmpty
-                                  ? filteredElements.length
-                                  : countryList.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                CountryInfo country =
-                                    filteredElements.isNotEmpty
-                                        ? filteredElements[index]
-                                        : countryList[index];
-                                return Column(
-                                  children: [
-                                    InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          selectedCountry = country;
-                                        });
-                                        _updateSelection(country);
-                                      },
-                                      child: Column(
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Expanded(
-                                                  child: Row(
-                                                    children: [
-                                                      Padding(
-                                                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                                                        child: ClipRRect(
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                  4.0),
-                                                          child: Image(
-                                                            image: AssetImage(
-                                                                'assets/flags/${country.shortName.toString().toLowerCase()}.png'),
-                                                            width: 27,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      Expanded(
-                                                        child: Text(
-                                                            ' ${country.name} (+${country.dialCode})',
-                                                            overflow: TextOverflow
-                                                                .ellipsis,
-                                                            maxLines: 1,
-                                                            softWrap: false),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                CircleRadioOption<CountryInfo>(
-                                                  onChanged:
-                                                      (CountryInfo? value) {
-                                                    setState(() {
-                                                      selectedCountry = value!;
-                                                    });
-                                                    _updateSelection(country);
-                                                  },
-                                                  groupValue: selectedCountry,
-                                                  value: filteredElements
-                                                          .isNotEmpty
-                                                      ? filteredElements[index]
-                                                      : countryList[index],
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          // const SizedBox(
-                                          //   height: 4,
-                                          // ),
-                                        ],
-                                      ),
-                                    ),
-                                    const Divider()
-                                  ],
-                                );
-                              }),
-                        )
+                        _bottomSheetHeader(context),
+                        _bottomSheetSearchBox(),
+                        _bottomSheetCountryList(setState)
                       ],
                     ),
                   ),
@@ -233,9 +136,130 @@ class _ShrimpCountryCodeState extends State<ShrimpCountryCode> {
         ),
         child: Padding(
           padding: EdgeInsets.all(widget.padding),
-          child: Text('+${selectedCountry.dialCode}'),
+          child: Text('+${selectedCountry.shortName}'),
         ),
       ),
+    );
+  }
+
+  Expanded _bottomSheetCountryList(StateSetter setState) {
+    return Expanded(
+      child: ListView.builder(
+          itemCount: filteredElements.isNotEmpty
+              ? filteredElements.length
+              : countryList.length,
+          itemBuilder: (BuildContext context, int index) {
+            CountryInfo country = filteredElements.isNotEmpty
+                ? filteredElements[index]
+                : countryList[index];
+            return Column(
+              children: [
+                InkWell(
+                  onTap: () {
+                    _updateSelection(country);
+                  },
+                  child: Column(
+                    children: [
+                      _countyCell(country, setState, index),
+                    ],
+                  ),
+                ),
+                const Divider()
+              ],
+            );
+          }),
+    );
+  }
+
+  Row _countyCell(CountryInfo country, StateSetter setState, int index) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Row(
+            children: [
+              if (widget.showFlags)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4.0),
+                    child: Image(
+                      image: AssetImage(
+                          'flags/${country.shortName.toString().toLowerCase()}.png',
+                          package: 'shrimp_country_code'),
+                      width: 27,
+                    ),
+                  ),
+                ),
+              Expanded(
+                child: Text(' ${country.name} (+${country.dialCode})',
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    softWrap: false),
+              ),
+            ],
+          ),
+        ),
+        CircleRadioOption<CountryInfo>(
+          onChanged: (CountryInfo? value) {
+            _updateSelection(country);
+          },
+          groupValue: selectedCountry,
+          value: filteredElements.isNotEmpty
+              ? filteredElements[index]
+              : countryList[index],
+        ),
+      ],
+    );
+  }
+
+  Column _bottomSheetSearchBox() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: TextFormField(
+            onChanged: (String keyWord) {
+              _filterCountries(keyWord);
+            },
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.search),
+              hintText: widget.searchFieldHint,
+            ),
+          ),
+        ),
+        const Divider()
+      ],
+    );
+  }
+
+  Row _bottomSheetHeader(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Expanded(
+          child: SizedBox(),
+          flex: 2,
+        ),
+        Expanded(
+          child: Center(
+              child: Text(
+            widget.modalTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          )),
+          flex: 2,
+        ),
+        const Spacer(),
+        IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(
+            Icons.close,
+            color: Colors.grey,
+          ),
+        ),
+      ],
     );
   }
 }
