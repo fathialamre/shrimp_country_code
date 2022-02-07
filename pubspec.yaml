@@ -1,6 +1,6 @@
 name: shrimp_country_code
 description: A flutter package for showing a country code selector with search box
-version: 0.0.6
+version: 0.0.6+1
 homepage: https://github.com/fathialamre/shrimp_country_code
 
 environment:

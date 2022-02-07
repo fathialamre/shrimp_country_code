@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'circle_radio_otpion.dart';
 import 'country_data.dart';
 import 'country_info.dart';
@@ -127,16 +126,20 @@ class _ShrimpCountryCodeState extends State<ShrimpCountryCode> {
           },
         );
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFFF2F3F3),
-          borderRadius: BorderRadius.all(
-            Radius.circular(widget.radius),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          height: 10,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF2F3F3),
+            borderRadius: BorderRadius.all(
+              Radius.circular(widget.radius),
+            ),
           ),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(widget.padding),
-          child: Text('+${selectedCountry.shortName}'),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+            child: Text('+${selectedCountry.dialCode}'),
+          ),
         ),
       ),
     );
@@ -184,15 +187,15 @@ class _ShrimpCountryCodeState extends State<ShrimpCountryCode> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(4.0),
                     child: Image(
-                      image: AssetImage(
-                          'flags/${country.shortName.toString().toLowerCase()}.png',
+                      image: AssetImage(country.flagUrl,
                           package: 'shrimp_country_code'),
                       width: 27,
                     ),
                   ),
                 ),
               Expanded(
-                child: Text(' ${country.name} (+${country.dialCode})',
+                child: Text(
+                    ' ${country.localizedName(context)} (+${country.dialCode})',
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     softWrap: false),

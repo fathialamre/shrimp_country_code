@@ -1,3 +1,7 @@
+import 'package:flutter/cupertino.dart';
+import 'package:shrimp_country_code/src/strings/ar.dart';
+import 'package:shrimp_country_code/src/strings/en.dart';
+
 class CountryInfo {
   String? dialCode;
   String? shortName;
@@ -5,6 +9,18 @@ class CountryInfo {
   String? displayName;
 
   CountryInfo({this.dialCode, this.shortName, this.name, this.displayName});
+
+  String get flagUrl {
+    return 'flags/${shortName.toString().toLowerCase()}.png';
+  }
+
+  String localizedName(BuildContext context) {
+    Locale myLocale = Localizations.localeOf(context);
+    if (myLocale.languageCode == 'ar') {
+      return ar[shortName] ?? 'لا توجد دولة';
+    }
+    return en[shortName] ?? 'No country found';
+  }
 
   CountryInfo.fromJson(Map<String, dynamic> json) {
     dialCode = json['dial_code'];
